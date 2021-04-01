@@ -8,7 +8,7 @@
     "name": "Web Environment Ribbon",
     "version": "14.0.1.0.0",
     "category": "Web",
-    "author": "Francesco OpenCode Apruzzese, "
+    "author": "Francesco OpenCode Apruzzese,"
     "Tecnativa, "
     "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/web",
