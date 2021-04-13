@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="report_delivery_document3" inherit_id="stock.report_delivery_document">
+        <xpath expr="//div[1]/t[@t-if='o.backorder_ids and backorders']/p/span" position="replace">
+            <span t-field="o.back_order_message"/>
+        </xpath>
+    </template>
+</odoo>
