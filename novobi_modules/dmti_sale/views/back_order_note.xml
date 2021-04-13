@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="back_order_note_tree_view" model="ir.ui.view">
+        <field name="name">back.order.note.tree</field>
+        <field name="model">back.order.note</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_back_order_note_view" model="ir.actions.act_window">
+        <field name="name">Back Order Note</field>
+        <field name="res_model">back.order.note</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('dmti_sale.back_order_note_tree_view')})]"/>
+    </record>
+    <menuitem id="menu_back_order_note_config"
+        name="Back Order Note"
+        parent="sale.menu_sale_config"
+        sequence="50"
+        action="action_back_order_note_view"
+    />
+</odoo>
