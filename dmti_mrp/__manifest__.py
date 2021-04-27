@@ -10,17 +10,14 @@
 
 
 {
-    'name': 'DMTI: Stock',
+    'name': 'DMTI: MRP',
     'version': '1.0',
     'summary': '',
     'author': 'Novobi LLC',
     'depends': [
-        'stock', 'mrp_subcontracting'
+        'mrp'
     ],
     'data': [
-        'security/ir.model.access.csv',
-        'views/stock_picking_views.xml',
-        'report/report_deliveryslip.xml',
     ],
     'installable': True,
     'auto_install': False,

@@ -15,7 +15,7 @@
     'summary': '',
     'author': 'Novobi LLC',
     'depends': [
-        'sale'
+        'sale', 'dmti_stock'
     ],
     'data': [
         'views/sale_order_views.xml',
