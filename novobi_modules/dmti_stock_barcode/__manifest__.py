@@ -10,17 +10,16 @@
 
 
 {
-    'name': 'DMTI: Stock',
+    'name': 'DMTI: Stock Barcode',
     'version': '1.0',
     'summary': '',
     'author': 'Novobi LLC',
     'depends': [
-        'stock', 'mrp_subcontracting'
+        'product', 'stock_barcode'
     ],
     'data': [
-        'security/ir.model.access.csv',
-        'views/stock_picking_views.xml',
-        'report/report_deliveryslip.xml',
+        'views/assets.xml',
+        'views/product_views.xml',
     ],
     'installable': True,
     'auto_install': False,
