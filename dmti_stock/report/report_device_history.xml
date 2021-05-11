@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- QWeb Reports -->
+        <report
+            print_report_name="'Device History Report - %s - %s' % (object.partner_id.name or '', object.name)"
+            id="device_history_report_pdf"
+            model="stock.picking"
+            string="Device History Report"
+            report_type="qweb-pdf"
+            name="dmti_stock.report_device_history_pdf"
+            file="dmti_stock.report_device_history_pdf"
+        />
+    </data>
+</odoo>

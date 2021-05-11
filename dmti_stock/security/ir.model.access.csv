@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_back_order_note_user,access.back.order.note.user,dmti_stock.model_back_order_note,base.group_user,1,1,1,1
 access_back_order_note_public,access.back.order.note.public,dmti_stock.model_back_order_note,,1,0,0,0
+access_click_device_history_report_wizard_user,access.click.device.history.report.wizard.user,dmti_stock.model_click_device_history_report_wizard,base.group_user,1,1,1,1
+access_click_device_history_report_wizard_public,access.click.device.history.report.wizard.public,dmti_stock.model_click_device_history_report_wizard,,1,0,0,0
