@@ -1,4 +1,5 @@
 from odoo import api, fields, models, tools, _
+from odoo.osv import expression
 
 class Product(models.Model):
     _inherit = 'product.product'
@@ -18,3 +19,10 @@ class Product(models.Model):
         hibc_products_dict = {product.pop('dmti_hibc'): product for product in hibc_products}
         products = {**res, **udi_products_dict, **hibc_products_dict}
         return products
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        product_ids = list(super(Product, self)._name_search(name, args, operator, limit, name_get_uid))
+        domain = ['|', ('dmti_udi', operator, name), ('dmti_hibc', operator, name)]
+        products = list(self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid))
+        return list(set(product_ids + products))

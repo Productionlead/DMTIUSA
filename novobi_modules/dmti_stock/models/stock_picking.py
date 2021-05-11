@@ -1,5 +1,8 @@
 from odoo import api, fields, models
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
     back_order_note_id = fields.Many2one('back.order.note', string='Back Order Note')

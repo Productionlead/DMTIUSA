@@ -18,6 +18,7 @@
         'mrp'
     ],
     'data': [
+        'views/mrp_production_tree_views.xml',
     ],
     'installable': True,
     'auto_install': False,

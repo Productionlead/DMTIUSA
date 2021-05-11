@@ -1,0 +1,1 @@
+from . import click_device_history_report_wizard
