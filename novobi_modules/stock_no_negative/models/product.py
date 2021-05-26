@@ -26,3 +26,9 @@ class ProductTemplate(models.Model):
         "then the validation of the related stock moves will be blocked if "
         "the stock level becomes negative with the stock move.",
     )
+
+class AllowNegativeStock(models.Model):
+    _name = "allow.negative.stock"
+
+    product_id = fields.Many2one('product.product', 'Product', required=True)
+    location_id = fields.Many2one('stock.location', 'Location', required=True)

@@ -9,6 +9,14 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="has_w9_document"/>
             </xpath>
+
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="client_order_ref"/>
+            </xpath>
+
+            <xpath expr="//page[@name='other_information']//field[@name='client_order_ref']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
         </field>
     </record>
 </odoo>

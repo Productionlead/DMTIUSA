@@ -16,7 +16,18 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
     delivery_id = fields.Many2one('res.partner', 'Delivery Address')
     shipping_date_from = fields.Date('Shipping Date From')
     shipping_date_to = fields.Date('Shipping Date To')
+    dmti_udi_hibc_code = fields.Char('UDI/HIBC')
     file = fields.Binary('export file')
+
+    def group_line(self, lines):
+        results = []
+        for line in lines:
+            if results and list(filter(lambda x: x[0].product_id.id == line.product_id.id, results)):
+                continue
+            else:
+                group = list(filter(lambda l: l.product_id.id == line.product_id.id, lines))
+                results.append(group)
+        return results
 
     def export_device_history_data(self):
         self.ensure_one()
@@ -29,6 +40,8 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
             domain += [('picking_id.sale_id.partner_id', '=', self.customer_id.id)]
         if self.delivery_id:
             domain += [('picking_id.partner_id', '=', self.delivery_id.id)]
+        if self.dmti_udi_hibc_code:
+            domain += ['|', ('dmti_udi_hibc_code', '=', self.dmti_udi_hibc_code), ('lot_id.dmti_udi_hibc_code', '=', self.dmti_udi_hibc_code)]
         if self.shipping_date_from:
             domain += [('picking_id.date_done', '>=', self.shipping_date_from)]
         if self.shipping_date_to:
@@ -40,7 +53,7 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('Device History')
         # add header
-        header = ['UDI', 'HIBC', 'Part Number', 'Product Name', 'Finished Good Lot Number', 'Sterilization Lot Number',
+        header = ['UDI/HIBC', 'Part Number', 'Product Name', 'Finished Good Lot Number', 'Sterilization Lot Number',
                   'Finished Good Quantity', 'Ship To / Customer Name', 'Ship To / Contact Name', 'Street Address 1',
                   'Street Address 2', 'City', 'State', 'Zip', 'Ship Date'
                 ]
@@ -53,25 +66,73 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
         except ValueError:
             pass
         # add data
+        max_column = 0
+        max_row = 1
+        check_line_lst = []
+        check_component_lst = []
         for row in range(1, len(line_items)+1):
+            rows = max_row
+            column_size = 14
+            i = 1
             line = line_items[row-1]
             product_id = line.product_id
             shipping_date = line.picking_id.date_done or line.picking_id.scheduled_date or ""
-            worksheet.write(row, 0, product_id.dmti_udi or "")
-            worksheet.write(row, 1, product_id.dmti_hibc or "")
-            worksheet.write(row, 2, product_id.default_code or "")
-            worksheet.write(row, 3, product_id.name or "")
-            worksheet.write(row, 4, line.lot_id.name or "")
-            worksheet.write(row, 5, line.lot_id.ref or "")
-            worksheet.write(row, 6, line.qty_done or "")
-            worksheet.write(row, 7, line.picking_id.sale_id.partner_id.name or "")
-            worksheet.write(row, 8, line.picking_id.partner_id.name or "")
-            worksheet.write(row, 9, line.picking_id.partner_id.street or "")
-            worksheet.write(row, 10, line.picking_id.partner_id.street2 or "")
-            worksheet.write(row, 11, line.picking_id.partner_id.city or "")
-            worksheet.write(row, 12, line.picking_id.partner_id.state_id.name or "")
-            worksheet.write(row, 13, line.picking_id.partner_id.zip or "")
-            worksheet.write(row, 14, str(shipping_date))
+            partner_id = line.picking_id.partner_id
+            customer_id = line.picking_id.sale_id.partner_id
+            row_values = [line.dmti_udi_hibc_code or line.lot_id.dmti_udi_hibc_code or "", product_id.default_code or "",
+                          product_id.name or "", line.lot_id.name or "", line.lot_id.ref or "", line.qty_done or "",
+                          customer_id.name or "", partner_id.name or "", partner_id.street or "", partner_id.street2 or "",
+                          partner_id.city or "", partner_id.state_id.name or "", partner_id.zip or "", str(shipping_date)
+            ]
+            for index, value in enumerate(row_values):
+                worksheet.write(max_row, index, value)
+            lines = self.get_lines(line)
+            list_group_lines = self.group_line(lines)
+            check_lot_list = [(line.lot_id.id, line.qty_done)]
+            for group_line in list_group_lines:
+                qty_need_done = 0
+                rows1 = rows
+                for index, line_item in enumerate(group_line):
+                    if list(filter(lambda l: l.id == line_item.id, check_line_lst)):
+                        continue
+                    component_qty = 0
+                    lot_finish_good_id = None
+                    if line_item.production_id:
+                        bom_id = line_item.production_id.bom_id
+                        lot_finish_good_id = line_item.production_id.lot_producing_id.id
+                        if bom_id:
+                            component = bom_id.bom_line_ids.filtered(lambda l: l.product_id.id == line_item.product_id.id)
+                            component_qty = component[0].product_qty if component else 0
+                    worksheet.write(0, column_size, "Component Product Name " + str(i) + " (Description)") if i > max_column and index == 0 else None
+                    worksheet.write(rows1, column_size, line_item.product_id.display_name)
+                    worksheet.write(0, column_size + 1, "Component Lot Number " + str(i)) if i > max_column and index == 0 else None
+                    worksheet.write(rows1, column_size + 1, line_item.lot_id.name if line_item.lot_id else '')
+                    worksheet.write(0, column_size + 2, "Component Part " + str(i) + " Quantity") if i > max_column and index == 0 else None
+                    parent_products = list(filter(lambda x: x[0] == lot_finish_good_id, check_lot_list))
+                    if parent_products:
+                        parent_quantity_done = parent_products[0][1]
+                    else:
+                        parent_quantity_done = 0
+                    if not qty_need_done:
+                        qty_need_done = parent_quantity_done * component_qty
+                    if qty_need_done <= line_item.qty_done:
+                        qty_done = qty_need_done
+                        qty_need_done = 0
+                    else:
+                        qty_done = line_item.qty_done
+                        qty_need_done -= qty_done
+                        check_line_lst.append(line_item)
+                    worksheet.write(rows1, column_size + 2, qty_done)
+                    check_lot_list.append((line_item.lot_id.id, qty_done))
+                    rows1 += 1
+                    if qty_need_done == 0:
+                        break
+                if rows1 > max_row:
+                    max_row = rows1
+                column_size += 3
+                i += 1
+            if i > max_column:
+                max_column = i - 1
         # save
         buffer = BytesIO()
         workbook.save(buffer)
@@ -82,3 +143,31 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
             url='/web/content?model=%s&id=%s&field=file&download=true&filename=DeviceHistoryReport.xls' % (self._name, self.id),
         )
         return value
+
+    @api.model
+    def get_lines(self, move_line_id):
+        lines = self.env['stock.move.line'].search([
+            ('product_id', '=', move_line_id.product_id.id),
+            ('lot_id', '=', move_line_id.lot_id.id),
+            ('id', '!=', move_line_id.id),
+            ('state', '=', 'done'),
+        ])
+        lines = lines.filtered(lambda l: not l.production_id)
+        move_line_vals = [move_line_id] + self._lines(move_lines=lines) if move_line_id.picking_code != 'outgoing' else self._lines(move_lines=lines)
+        return move_line_vals
+
+    @api.model
+    def _lines(self, move_lines=[]):
+        final_vals = []
+        lines = move_lines or []
+        for line in lines:
+            # Not check for type of move line as Outgoing
+            if line.picking_code == 'outgoing':
+                continue
+            # Finish good( Production)
+            elif line.move_id.production_id:
+                # Find Component
+                if line.consume_line_ids:
+                    for line_id in line.consume_line_ids:
+                        final_vals += self.get_lines(line_id)
+        return final_vals

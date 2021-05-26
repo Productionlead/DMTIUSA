@@ -20,6 +20,9 @@ class StockQuant(models.Model):
             return
 
         for quant in self:
+            subcontracting_product = self.env['allow.negative.stock'].search([('product_id', '=', quant.product_id.id), ('location_id', '=', quant.location_id.id)], limit=1)
+            if subcontracting_product:
+                break
             disallowed_by_product = (
                 not quant.product_id.allow_negative_stock
                 and not quant.product_id.categ_id.allow_negative_stock

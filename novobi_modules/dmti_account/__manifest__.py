@@ -10,17 +10,15 @@
 
 
 {
-    'name': 'DMTI: Stock Barcode',
+    'name': 'DMTI: Account',
     'version': '1.0',
     'summary': '',
     'author': 'Novobi LLC',
     'depends': [
-        'product', 'stock_barcode'
+        'account',
     ],
     'data': [
-        'views/assets.xml',
-        'views/product_views.xml',
-        'views/stock_move_line_views.xml',
+        'views/account_move_views.xml',
     ],
     'installable': True,
     'auto_install': False,

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="inherit_stock_move_line_product_selector"
+		model="ir.ui.view">
+		<field name="name">inherit.stock.move.line.selector</field>
+		<field name="model">stock.move.line</field>
+		<field name="inherit_id" ref="stock_barcode.stock_move_line_product_selector"/>
+		<field name="arch" type="xml">
+            <xpath expr="//form/div[last()]" position="after">
+                <div class="row">
+                    <div class="col-12 col-md-6 my-2 d-flex align-items-baseline">
+                        <i class="fa fa-fw fa-lg fa-user-o text-center mr-3" title="UDI/HIBC"/>
+                        <field name="dmti_udi_hibc_code" placeholder="UDI/HIBC"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
