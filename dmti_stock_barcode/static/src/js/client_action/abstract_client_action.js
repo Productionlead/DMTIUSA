@@ -28,7 +28,7 @@ ClientAction.include({
             }
             return product;
         } else {
-            return {'product': this.productsByBarcode[parsed.code], 'lot_number': lot_number}
+            return {'product': this.productsByBarcode[parsed.code], 'lot_number': lot_number , 'dmti_udi_hibc_code': barcode}
         }
     },
     _step_product: function (barcode, linesActions) {
@@ -40,11 +40,12 @@ ClientAction.include({
         var result = this._isProduct(barcode);
         var product = result['product'];
         var lot_name = result['lot_number'];
+        var dmti_udi_hibc_code = result['dmti_udi_hibc_code']
         if (product) {
             if (product.tracking !== 'none' && self.requireLotNumber) {
                 this.currentStep = 'lot';
             }
-            var res = this._incrementLines({'product': product, 'barcode': barcode, 'lot_name': lot_name});
+            var res = this._incrementLines({'product': product, 'barcode': barcode, 'lot_name': lot_name, 'dmti_udi_hibc_code': dmti_udi_hibc_code});
             if (res.isNewLine) {
                 if (this.actionParams.model === 'stock.inventory') {
                     // FIXME sle: add owner_id, prod_lot_id, owner_id, product_uom_id

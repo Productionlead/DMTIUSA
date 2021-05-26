@@ -12,6 +12,10 @@
                     <field name="back_order_message"/>
                 </group>
             </xpath>
+
+            <xpath expr="//field[@name='owner_id']" position="after">
+                <field name="client_order_ref"/>
+            </xpath>
         </field>
     </record>
 </odoo>

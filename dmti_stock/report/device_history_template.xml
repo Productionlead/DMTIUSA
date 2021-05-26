@@ -13,7 +13,7 @@
                 <t t-if="address1">
                     <t t-set="colclass" t-value="('col-md-4' if report_type == 'html' else 'col-4')"/>
                     <t t-if="address">
-                        <div class="address row">
+                        <div class="address row" style="font-size: 12pt;">
                             <t t-if="information_block">
                                 <t t-set="colclass" t-value="'col-5 offset-1'"/>
                                 <div name="information_block" class="col-6">
@@ -36,7 +36,7 @@
                 <t t-else="">
                     <t t-set="colclass" t-value="('col-md-5' if report_type == 'html' else 'col-5') + ' ml-auto'"/>
                     <t t-if="address">
-                        <div class="address row">
+                        <div class="address row" style="font-size: 12pt;">
                             <t t-if="information_block">
                                 <t t-set="colclass" t-value="'col-5 offset-1'"/>
                                 <div name="information_block" class="col-6">
@@ -95,8 +95,7 @@
                             <t t-set="has_serial_number" t-value="o.move_line_ids.mapped('lot_id')" groups="stock.group_lot_on_delivery_slip"/>
                             <thead>
                                 <tr>
-                                    <th name="th_sml_udi"><strong>UDI</strong></th>
-                                    <th name="th_sml_hibc"><strong>HIBC</strong></th>
+                                    <th name="th_sml_udi"><strong>UDI/HIBC</strong></th>
                                     <th name="th_sml_part_number"><strong>Part Number</strong></th>
                                     <th name="th_sml_product_name"><strong>Product Name</strong></th>
                                     <t name="lot_serial">
@@ -110,11 +109,8 @@
                             </thead>
                             <tbody>
                                 <tr t-foreach="o.move_line_ids" t-as="move_line">
-                                    <t name="move_line_udi">
-                                        <td><span t-field="move_line.product_id.dmti_udi"/></td>
-                                    </t>
-                                    <t name="move_line_hibc">
-                                        <td><span t-field="move_line.product_id.dmti_hibc"/></td>
+                                    <t name="move_line_udi_hibc_code">
+                                        <td><span t-field="move_line.dmti_udi_hibc_code or move_line.lot_id.dmti_udi_hibc_code"/></td>
                                     </t>
                                     <t name="move_line_part_number">
                                         <td><span t-field="move_line.product_id.default_code"/></td>

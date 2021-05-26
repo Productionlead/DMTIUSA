@@ -3,8 +3,14 @@ from odoo import api, fields, models
 import logging
 _logger = logging.getLogger(__name__)
 
+
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
+
+    # Override
+    client_order_ref = fields.Char(string='Customer PO', related='sale_id.client_order_ref')
+
+    # New fields
     back_order_note_id = fields.Many2one('back.order.note', string='Back Order Note')
     back_order_message = fields.Char()
 

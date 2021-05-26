@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="allow_negative_stock_tree_view" model="ir.ui.view">
+        <field name="name">allow.negative.stock.tree</field>
+        <field name="model">allow.negative.stock</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="product_id"/>
+                <field name="location_id"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_allow_negative_stock_view" model="ir.actions.act_window">
+        <field name="name">Allow Negative Stock</field>
+        <field name="res_model">allow.negative.stock</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('stock_no_negative.allow_negative_stock_tree_view')})]"/>
+    </record>
+    <menuitem id="menu_allow_negative_stock_config"
+        name="Allow Negative Stock"
+        parent="stock.menu_stock_inventory_control"
+        sequence="1000"
+        action="action_allow_negative_stock_view"
+    />
+</odoo>

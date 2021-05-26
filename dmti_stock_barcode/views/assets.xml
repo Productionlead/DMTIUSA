@@ -3,6 +3,7 @@
     <template id="assets_backend" inherit_id="web.assets_backend" name="Client Action">
         <xpath expr="script[last()]" position="after">
             <script type="text/javascript" src="/dmti_stock_barcode/static/src/js/client_action/abstract_client_action.js"></script>
+            <script type="text/javascript" src="/dmti_stock_barcode/static/src/js/client_action/picking_client_action.js"></script>
         </xpath>
     </template>
 </odoo>
