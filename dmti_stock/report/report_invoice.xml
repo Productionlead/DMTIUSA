@@ -10,9 +10,6 @@
         <xpath expr='//span[@t-if="o.move_type == &apos;out_refund&apos;"]' position="replace">
             <span t-if="o.move_type == 'out_refund'">Credit Memo</span>
         </xpath>
-        <xpath expr="//div[@name='origin']" position="attributes">
-            <attribute name="style">display:none;</attribute>
-        </xpath>
         <xpath expr="//div[@name='reference']/strong" position="replace">
             <strong>Customer PO:</strong>
         </xpath>

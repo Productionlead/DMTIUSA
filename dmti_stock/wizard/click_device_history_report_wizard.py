@@ -30,6 +30,9 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
         return results
 
     def export_device_history_data(self):
+        '''
+        :return: This function is used to write Finish good products are delivered with their components in file Excel
+        '''
         self.ensure_one()
         domain = [('picking_id.picking_type_code', '=', 'outgoing'), ('picking_id.state', '=', 'done')]
         if self.product_id:
@@ -49,10 +52,10 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
         if len(domain) == 2:
             raise UserError("Please select at least one criteria.")
         line_items = self.env['stock.move.line'].sudo().search(domain)
-        # generate Exel file
+        # Generate Exel file
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('Device History')
-        # add header
+        # Add header
         header = ['UDI/HIBC', 'Part Number', 'Product Name', 'Finished Good Lot Number', 'Sterilization Lot Number',
                   'Finished Good Quantity', 'Ship To / Customer Name', 'Ship To / Contact Name', 'Street Address 1',
                   'Street Address 2', 'City', 'State', 'Zip', 'Ship Date'
@@ -65,11 +68,17 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
                 worksheet.col(i).width = col_width
         except ValueError:
             pass
-        # add data
+        # Add data
         max_column = 0
         max_row = 1
+        '''
+            check_line_lst: If the remaining qty of move line == 0 => add move line in check_line_lst
+            max_column: is the largest number of Column
+            max_row: is the largest number of Row
+            check_lot_list: save list of lot number with quantity of Parent product
+        '''
         check_line_lst = []
-        check_component_lst = []
+        check_qty_done_lst = []
         for row in range(1, len(line_items)+1):
             rows = max_row
             column_size = 14
@@ -79,22 +88,30 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
             shipping_date = line.picking_id.date_done or line.picking_id.scheduled_date or ""
             partner_id = line.picking_id.partner_id
             customer_id = line.picking_id.sale_id.partner_id
-            row_values = [line.dmti_udi_hibc_code or line.lot_id.dmti_udi_hibc_code or "", product_id.default_code or "",
-                          product_id.name or "", line.lot_id.name or "", line.lot_id.ref or "", line.qty_done or "",
-                          customer_id.name or "", partner_id.name or "", partner_id.street or "", partner_id.street2 or "",
-                          partner_id.city or "", partner_id.state_id.name or "", partner_id.zip or "", str(shipping_date)
+            row_values = [line.dmti_udi_hibc_code or line.lot_id.dmti_udi_hibc_code, product_id.default_code,
+                          product_id.name, line.lot_id.name, line.lot_id.ref, line.qty_done,
+                          customer_id.name, partner_id.name, partner_id.street, partner_id.street2,
+                          partner_id.city, partner_id.state_id.name, partner_id.zip, str(shipping_date)
             ]
             for index, value in enumerate(row_values):
-                worksheet.write(max_row, index, value)
+                worksheet.write(max_row, index, value or "")
             lines = self.get_lines(line)
             list_group_lines = self.group_line(lines)
             check_lot_list = [(line.lot_id.id, line.qty_done)]
+            max_row = max_row + 1 if not list_group_lines else max_row
             for group_line in list_group_lines:
                 qty_need_done = 0
                 rows1 = rows
                 for index, line_item in enumerate(group_line):
                     if list(filter(lambda l: l.id == line_item.id, check_line_lst)):
                         continue
+                    check_qty_done = list(filter(lambda q: q[0] == line_item.id, check_qty_done_lst))
+                    if check_qty_done:
+                        line_qty_done = check_qty_done[-1][1]
+                        if line_qty_done == 0:
+                            continue
+                    else:
+                        line_qty_done = line_item.qty_done
                     component_qty = 0
                     lot_finish_good_id = None
                     if line_item.production_id:
@@ -115,11 +132,13 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
                         parent_quantity_done = 0
                     if not qty_need_done:
                         qty_need_done = parent_quantity_done * component_qty
-                    if qty_need_done <= line_item.qty_done:
+                    if qty_need_done <= line_qty_done:
                         qty_done = qty_need_done
+                        check_qty_done_lst.append((line_item.id, line_qty_done - qty_need_done))
                         qty_need_done = 0
                     else:
-                        qty_done = line_item.qty_done
+                        check_qty_done_lst.append((line_item.id, 0))
+                        qty_done = line_qty_done
                         qty_need_done -= qty_done
                         check_line_lst.append(line_item)
                     worksheet.write(rows1, column_size + 2, qty_done)
@@ -146,15 +165,20 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
 
     @api.model
     def get_lines(self, move_line_id):
+        '''
+        :param move_line_id: is Finish Good
+        :return: component move line of Finish Good that we need to show in file Excel
+        '''
         lines = self.env['stock.move.line'].search([
             ('product_id', '=', move_line_id.product_id.id),
             ('lot_id', '=', move_line_id.lot_id.id),
             ('id', '!=', move_line_id.id),
             ('state', '=', 'done'),
         ])
-        lines = lines.filtered(lambda l: not l.production_id)
-        move_line_vals = [move_line_id] + self._lines(move_lines=lines) if move_line_id.picking_code != 'outgoing' else self._lines(move_lines=lines)
-        return move_line_vals
+        # Component move lines is stock move lines( component of Fish Good) with picking type not as "Outgoing"
+        component_move_lines = lines.filtered(lambda l: not l.production_id)
+        component_move_lines_lst = [move_line_id] + self._lines(move_lines=component_move_lines) if move_line_id.picking_code != 'outgoing' else self._lines(move_lines=component_move_lines)
+        return component_move_lines_lst
 
     @api.model
     def _lines(self, move_lines=[]):
