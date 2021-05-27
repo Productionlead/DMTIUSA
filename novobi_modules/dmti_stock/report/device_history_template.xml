@@ -70,14 +70,14 @@
                             t-options='{"widget": "contact", "fields": ["name"], "no_marker": True}'/>
                        </t>
                     </t>
-                    <div class="page">
+                    <div class="page font-11">
                         <style>
                             table,tr,td,th{
                                 border: 1px solid black;
                             }
                         </style>
-                        <h2>
-                            <span t-field="o.name" style="color: #003399"/>
+                        <h2 class="title">
+                            <span t-field="o.name"/>
                             <span> - </span>
                             <span>Device History</span>
                         </h2>
