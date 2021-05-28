@@ -144,7 +144,7 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
                     worksheet.write(rows1, column_size + 2, qty_done)
                     check_lot_list.append((line_item.lot_id.id, qty_done))
                     rows1 += 1
-                    if qty_need_done == 0:
+                    if qty_need_done == 0 and not list(filter(lambda l: l.lot_id.id == line_item.lot_id.id, group_line[index+1:])):
                         break
                 if rows1 > max_row:
                     max_row = rows1
