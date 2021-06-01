@@ -18,9 +18,9 @@ class StockProductionLot(models.Model):
             domain = ['|', ('name', operator, name), ('ref', operator, name)]
         return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
 
-    def write(self, vals):
-        if vals.get('dmti_udi_hibc_code', False):
-            stock_move_line_id = self.env['stock.move.line'].search([('lot_name', '=', self.name), ('product_id', '=', self.product_id.id), ('dmti_udi_hibc_code', '!=', vals.get('dmti_udi_hibc_code'))], limit=1)
-            if stock_move_line_id:
-                raise UserError("UDI/HIBC must be same as UDI/HIBC on Lot Number.")
-        return super(StockProductionLot, self).write(vals)
+    # def write(self, vals):
+    #     if vals.get('dmti_udi_hibc_code', False):
+    #         stock_move_line_id = self.env['stock.move.line'].search([('lot_name', '=', self.name), ('product_id', '=', self.product_id.id), ('dmti_udi_hibc_code', '!=', vals.get('dmti_udi_hibc_code'))], limit=1)
+    #         if stock_move_line_id:
+    #             raise UserError("UDI/HIBC must be same as UDI/HIBC on Lot Number.")
+    #     return super(StockProductionLot, self).write(vals)
