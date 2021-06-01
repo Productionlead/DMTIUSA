@@ -13,10 +13,10 @@ class StockMoveLine(models.Model):
         })
         return res
 
-    @api.model
-    def create(self, vals):
-        if vals.get('lot_name', False) and vals.get('product_id', False):
-            lot_id = self.env['stock.production.lot'].search([('name', '=', vals.get('lot_name')), ('product_id', '=', vals.get('product_id'))])
-            if lot_id and lot_id.dmti_udi_hibc_code != vals.get('dmti_udi_hibc_code', ''):
-                raise UserError("UDI/HIBC must be same as UDI/HIBC on Lot Number.")
-        return super(StockMoveLine, self).create(vals)
+    # @api.model
+    # def create(self, vals):
+    #     if vals.get('lot_name', False) and vals.get('product_id', False):
+    #         lot_id = self.env['stock.production.lot'].search([('name', '=', vals.get('lot_name')), ('product_id', '=', vals.get('product_id'))])
+    #         if lot_id and lot_id.dmti_udi_hibc_code != vals.get('dmti_udi_hibc_code', ''):
+    #             raise UserError("UDI/HIBC must be same as UDI/HIBC on Lot Number.")
+    #     return super(StockMoveLine, self).create(vals)
