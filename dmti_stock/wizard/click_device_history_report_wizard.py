@@ -113,11 +113,13 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
                     else:
                         line_qty_done = line_item.qty_done
                     component_qty = 0
+                    product_qty = 1
                     lot_finish_good_id = None
                     if line_item.production_id:
                         bom_id = line_item.production_id.bom_id
                         lot_finish_good_id = line_item.production_id.lot_producing_id.id
                         if bom_id:
+                            product_qty = bom_id.product_qty
                             component = bom_id.bom_line_ids.filtered(lambda l: l.product_id.id == line_item.product_id.id)
                             component_qty = component[0].product_qty if component else 0
                     worksheet.write(0, column_size, "Component Product Name " + str(i) + " (Description)") if i > max_column and index == 0 else None
@@ -131,7 +133,7 @@ class ClickDeviceHistoryReportWizard(models.TransientModel):
                     else:
                         parent_quantity_done = 0
                     if not qty_need_done:
-                        qty_need_done = parent_quantity_done * component_qty
+                        qty_need_done = parent_quantity_done * component_qty / product_qty
                     if qty_need_done <= line_qty_done:
                         qty_done = qty_need_done
                         check_qty_done_lst.append((line_item.id, line_qty_done - qty_need_done))
